@@ -1,0 +1,62 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.AI;
+
+
+public class EnemyRangedAI : MonoBehaviour
+{
+    //sets the speed of the enemy
+    public float speed;
+    //reference to the players transform
+    private Transform player;
+    //public Animator anim;
+    //the distance the enemy can see you from
+    public float viewDist;
+    //the distance the enemy can attack from
+    public float attackDist;
+    //calling navmesh agent for the ai's movement
+    NavMeshAgent navMeshAgent;
+
+    void Start()
+    {
+        //finding the navmesh component
+        navMeshAgent = this.GetComponent<NavMeshAgent>();
+        //a reference to the player
+        player = GameObject.FindGameObjectWithTag("Player").GetComponent<Transform>();
+        //anim = anim.GetComponent<Animator>();
+    }
+
+    void Update()
+    {
+        //runs this function every frame
+        FollowPlayer();
+    }
+
+    void FollowPlayer()
+    {
+        //getting the enemy to look at the player
+        Quaternion targetRotation = Quaternion.LookRotation(player.transform.position - transform.position);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 1 * Time.deltaTime);
+        
+        //this function is to move the enemy towards the player if its in range for the current project the range isn't an issue
+        if (Vector3.Distance(transform.position, player.position) > viewDist)
+        {
+            //sets the target location
+            Vector3 targetVector = player.transform.position;
+            //uses a navmesh function to move the enemy towards the player
+            navMeshAgent.SetDestination(targetVector);
+            //just a check to make sure the enemy isn't stationary
+            navMeshAgent.isStopped = false;
+            //transform.position = Vector3.MoveTowards(transform.position, player.position, speed * Time.deltaTime);
+        }
+        
+        //this function is for when the enemy is within range to attack the player
+        if (Vector3.Distance(transform.position, player.position) < attackDist)
+        {
+            //stops the enemy movement for the attack animation 
+            navMeshAgent.isStopped = true;
+            //anim.SetTrigger("Swing");
+        }
+    }
+}
